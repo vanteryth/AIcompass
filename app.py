@@ -34,16 +34,17 @@ def serve_next_question(conn, session_id, current_score, questions_answered, tot
         f"Reply with 1, 2, 3, or 4!"
     )
 
+    # FIX: Force every single parameter value to be a String for Dialogflow ES
     context_payload = {
         "name": f"{session_id}/contexts/quiz-state",
         "lifespanCount": 5,
         "parameters": {
-            "current_q_id": row['id'],
+            "current_q_id": str(row['id']),
             "correct_answer": str(row['answer']).strip(),
-            "current_score": current_score,
-            "questions_answered": questions_answered,
-            "total_requested": total_requested,
-            "target_topic": target_topic if target_topic else ""
+            "current_score": str(current_score),
+            "questions_answered": str(questions_answered),
+            "total_requested": str(total_requested),
+            "target_topic": str(target_topic) if target_topic else ""
         }
     }
     return bot_response, context_payload
@@ -59,7 +60,7 @@ def api_chat():
     user_text = request.json.get('message')
     session_id = request.json.get('session_id', 'demo-session-123')
 
-    # Pull Project ID from environment variables (Set this in Render Dashboard later)
+    # Pull Project ID from environment variables
     project_id = os.environ.get('DIALOGFLOW_PROJECT_ID')
 
     if not project_id:
@@ -76,7 +77,15 @@ def api_chat():
         response = session_client.detect_intent(
             request={"session": session, "query_input": query_input}
         )
+        
+        # FIX: Aggressively grab the text. If fulfillment_text is empty, check the messages array.
         bot_reply = response.query_result.fulfillment_text
+        if not bot_reply and len(response.query_result.fulfillment_messages) > 0:
+            try:
+                bot_reply = response.query_result.fulfillment_messages[0].text.text[0]
+            except Exception:
+                pass
+                
         return jsonify({"reply": bot_reply})
         
     except Exception as e:
@@ -163,11 +172,11 @@ def webhook():
                 break
                 
         if quiz_state:
-            current_q_id = int(quiz_state.get('current_q_id', 0))
+            current_q_id = int(float(quiz_state.get('current_q_id', 0)))
             correct_ans = str(quiz_state.get('correct_answer', '')).strip()
-            score = int(quiz_state.get('current_score', 0))
-            answered_count = int(quiz_state.get('questions_answered', 0)) + 1
-            total_needed = int(quiz_state.get('total_requested', 1))
+            score = int(float(quiz_state.get('current_score', 0)))
+            answered_count = int(float(quiz_state.get('questions_answered', 0))) + 1
+            total_needed = int(float(quiz_state.get('total_requested', 1)))
             saved_topic = quiz_state.get('target_topic')
             
             q_row = conn.execute('SELECT topic, explanation FROM quiz_questions WHERE id = ?', (current_q_id,)).fetchone()
