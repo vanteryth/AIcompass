@@ -50,7 +50,7 @@ def webhook():
     intent_name = req.get('queryResult', {}).get('intent', {}).get('displayName')
     parameters = req.get('queryResult', {}).get('parameters', {})
     
-    reply_text = "I didn't quite catch that. Try checking the guide on the side for examples, like asking for a definition or a quiz!"
+    reply_text = req.get('queryResult', {}).get('fulfillmentText', "I didn't quite catch that. Try checking the guide on the side for examples, like asking for a definition or a quiz!")
 
     if intent_name == 'Get Definition':
         topic = parameters.get('topic')
