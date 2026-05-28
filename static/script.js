@@ -1,35 +1,70 @@
 const chatBox = document.getElementById('chat-box');
 const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
 
-function addMsg(text, className) {
-    const div = document.createElement('div');
-    div.className = `msg ${className}`;
-    div.innerText = text;
-    chatBox.appendChild(div);
+window.onload = () => {
+    addBotMsg("Welcome! Ask me for a definition, a fun fact, or type 'test me for 3' to start a quiz. Check the guide on the side for more options!");
+};
+
+function addUserMsg(text) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'msg-wrapper user-wrapper slide-in';
+    wrapper.innerHTML = `<div class="msg user-msg">${text}</div>`;
+    chatBox.appendChild(wrapper);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function addBotMsg(text) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'msg-wrapper bot-wrapper slide-in';
+    wrapper.innerHTML = `<div class="bot-avatar">🧭</div><div class="msg bot-msg">${text}</div>`;
+    chatBox.appendChild(wrapper);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 function addTyping() {
-    const div = document.createElement('div');
-    div.className = 'typing';
-    div.id = 'typing';
-    div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-    chatBox.appendChild(div);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'msg-wrapper bot-wrapper';
+    wrapper.id = 'typing';
+    wrapper.innerHTML = `<div class="bot-avatar">🧭</div><div class="msg bot-msg typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+    chatBox.appendChild(wrapper);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-document.getElementById('send-btn').onclick = async () => {
-    const text = userInput.value;
+async function handleSend() {
+    const text = userInput.value.trim();
     if(!text) return;
-    addMsg(text, 'user-msg');
+    
+    addUserMsg(text);
     userInput.value = '';
     addTyping();
 
-    const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({message: text})
-    });
-    const data = await res.json();
-    document.getElementById('typing').remove();
-    addMsg(data.reply, 'bot-msg');
-};
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: text})
+        });
+        const data = await res.json();
+        document.getElementById('typing').remove();
+        
+        let reply = data.reply;
+        if (!reply || reply.trim() === "") {
+            reply = "I didn't quite catch that. Try checking the guide on the side for examples, like asking for a definition or a quiz!";
+        }
+        
+        addBotMsg(reply);
+    } catch (err) {
+        document.getElementById('typing').remove();
+        addBotMsg("I didn't quite catch that. Try checking the guide on the side for examples, like asking for a definition or a quiz!");
+    }
+}
+
+sendBtn.addEventListener('click', handleSend);
+
+userInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault(); 
+        handleSend();
+    }
+});

@@ -4,18 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AICompass</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <img src="/static/compass.png" class="header-icon" onerror="this.style.display='none'">
-            <h2>AICompass</h2>
+    <div class="app-wrapper">
+        <div class="guide-card">
+            <h3>🧭 AICompass Guide</h3>
+            <p>Welcome! Here are a few things you can ask me:</p>
+            <ul>
+                <li><strong>Definitions:</strong> "Define machine learning"</li>
+                <li><strong>Context:</strong> "Give me an example"</li>
+                <li><strong>Trivia:</strong> "Tell me a fun fact"</li>
+                <li><strong>Quizzes:</strong> "Test me for 3"</li>
+            </ul>
         </div>
-        <div class="chat-box" id="chat-box"></div>
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Type here..." autocomplete="off">
-            <button id="send-btn">Send</button>
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>AICompass</h2>
+            </div>
+            <div class="chat-box" id="chat-box"></div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Type here..." autocomplete="off">
+                <button id="send-btn">Send</button>
+            </div>
         </div>
     </div>
     <script src="/static/script.js"></script>
