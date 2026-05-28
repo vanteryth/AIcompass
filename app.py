@@ -3,9 +3,12 @@ import sqlite3
 import os
 
 app = Flask(__name__)
-DB_NAME = "aicompass.db"
 
 # --- DATABASE CONNECTION & LOGIC ---
+
+# Force the server to look in the exact directory where app.py lives
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_NAME = os.path.join(BASE_DIR, "aicompass.db")
 
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
@@ -92,6 +95,10 @@ def webhook():
         output_contexts = query_result.get('outputContexts', [])
     except AttributeError:
         return jsonify({"fulfillmentText": "Error reading payload."})
+    
+    # Diagnostics to check what Dialogflow is actually sending
+    print(f"🔥 DIALOGFLOW SENT INTENT: '{intent_name}'", flush=True)
+    print(f"🔥 DIALOGFLOW PARAMETERS: {parameters}", flush=True)
     
     conn = get_db_connection()
     bot_response = "I'm not sure how to respond to that yet."
