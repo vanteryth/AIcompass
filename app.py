@@ -102,7 +102,7 @@ def webhook():
     out_contexts_response = []
 
     if intent_name == 'Default Welcome Intent':
-        bot_response = "Welcome to AICompass! Want to learn definitions, hear fun facts, or start a quiz?"
+        return jsonify({"fulfillmentText": req.get('queryResult', {}).get('fulfillmentText', "Hi, I'm AICompass!")})
 
     elif intent_name == 'module.dictionary':
         requested_topic = parameters.get('ai_topic')

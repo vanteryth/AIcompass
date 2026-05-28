@@ -3,7 +3,7 @@ const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 
 window.onload = () => {
-    addBotMsg("Welcome! Ask me for a definition, a fun fact, or type 'test me for 3' to start a quiz. Check the guide on the side for more options!");
+    addBotMsg("Hi, I'm AICompass! I'm here to boost your AI literacy. Ask me about definitions, facts, or quizzes using the guide on the side!");
 };
 
 function addUserMsg(text) {
