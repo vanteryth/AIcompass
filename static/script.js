@@ -1,56 +1,35 @@
 const chatBox = document.getElementById('chat-box');
 const userInput = document.getElementById('user-input');
-const sendBtn = document.getElementById('send-btn');
 
-const sessionId = Math.random().toString(36).substring(2, 15);
-
-function addMessage(text, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message');
-    
-    if (sender === 'user') {
-        messageDiv.classList.add('user-message');
-    } else {
-        messageDiv.classList.add('bot-message');
-        text = '🧭 ' + text;
-    }
-    
-    messageDiv.innerText = text;
-    chatBox.appendChild(messageDiv);
+function addMsg(text, className) {
+    const div = document.createElement('div');
+    div.className = `msg ${className}`;
+    div.innerText = text;
+    chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function handleSend() {
-    const text = userInput.value.trim();
-    if (text === '') return;
-
-    addMessage(text, 'user');
-    userInput.value = '';
-
-    fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-            message: text,
-            session_id: sessionId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        addMessage(data.reply, 'bot');
-    })
-    .catch(error => {
-        console.error("Error connecting to server:", error);
-        addMessage("Connection error. Ensure the Flask server is running.", 'bot');
-    });
+function addTyping() {
+    const div = document.createElement('div');
+    div.className = 'typing';
+    div.id = 'typing';
+    div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+    chatBox.appendChild(div);
 }
 
-sendBtn.addEventListener('click', handleSend);
+document.getElementById('send-btn').onclick = async () => {
+    const text = userInput.value;
+    if(!text) return;
+    addMsg(text, 'user-msg');
+    userInput.value = '';
+    addTyping();
 
-userInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        handleSend();
-    }
-});
+    const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: text})
+    });
+    const data = await res.json();
+    document.getElementById('typing').remove();
+    addMsg(data.reply, 'bot-msg');
+};
